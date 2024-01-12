@@ -1,3 +1,4 @@
+forecast_mode <- function(folder, model_id, site_num){
 
 library(tidyverse)
 library(neon4cast)
@@ -10,7 +11,7 @@ forecast_date <- Sys.Date()
 noaa_date <- Sys.Date() - days(3)  #Need to use yesterday's NOAA forecast because today's is not available yet
 
 # Step 0: Define a unique name which will identify your model in the leaderboard and connect it to team members info, etc
-model_id <- "neon4cast_example"
+#model_id <- "neon4cast_example"
 
 # Step 1: Download latest target data and site description data
 target <- readr::read_csv(paste0("https://data.ecoforecast.org/neon4cast-targets/",
@@ -130,7 +131,7 @@ forecast_site <- function(site) {
 ### AND HERE WE GO! We're ready to start forecasting ### 
 
 ## Test with a single site first!
-forecast <- forecast_site( sites[1] )
+forecast <- forecast_site( sites[[as.numeric(site_num)]] )
 
 #Visualize the ensemble predictions -- what do you think?
 forecast |> 
@@ -140,18 +141,19 @@ forecast |>
 
 
 # Run all sites -- may be slow!
-forecast <- map_dfr(sites, forecast_site)
+#forecast <- map_dfr(sites, forecast_site)
 
 
 #Forecast output file name in standards requires for Challenge.
 # csv.gz means that it will be compressed
 file_date <- Sys.Date() #forecast$reference_datetime[1]
-forecast_file <- paste0("aquatics","-",file_date,"-",model_id,".csv.gz")
+forecast_file <- paste0("aquatics","-",model_id,"-",site_num,".csv.gz")
 
 #Write csv to disk
 write_csv(forecast, forecast_file)
 
 # Step 4: Submit forecast!
 
-neon4cast::submit(forecast_file = forecast_file, metadata = NULL, ask = FALSE)
-
+#neon4cast::submit(forecast_file = forecast_file, metadata = NULL, ask = FALSE)
+FaaSr::faasr_put_file(local_file=forecast_file, remote_folder=folder, remote_file=forecast_file)
+}
