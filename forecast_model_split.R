@@ -1,4 +1,4 @@
-forecast_mode_split <- function(folder, model_id, site_num){
+forecast_model_split <- function(folder, model_id, site_num){
 
 library(tidyverse)
 library(neon4cast)
