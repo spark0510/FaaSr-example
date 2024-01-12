@@ -1,11 +1,11 @@
-forecast_model_merge <- function(folder, model_id){
+forecast_model_merge <- function(folder, model_id, start, end){
 
   library("tidyverse")
 
   dir.create("forecast_files")
   setwd("forecast_files")
   
-  for (i in 1:34){
+  for (i in as.numeric(start):as.numeric(end)){
     forecast_file <- paste0("aquatics","-",model_id,"-",i,".csv.gz")
     FaaSr::faasr_get_file(local_file=forecast_file, remote_folder=folder, remote_file=forecast_file)
   }
