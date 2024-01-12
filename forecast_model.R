@@ -1,16 +1,26 @@
-
+forecast_model <- function(folder, model_id){
 library(tidyverse)
 library(neon4cast)
 library(lubridate)
 library(rMR)
 library(glue)
-source("ignore_sigpipe.R")
+#source("ignore_sigpipe.R")
+library(decor)
+cpp11::cpp_source(code = '
+#include <csignal>
+#include <cpp11.hpp>
+
+[[cpp11::register]] void ignore_sigpipes() {
+  signal(SIGPIPE, SIG_IGN);
+}
+')
+ignore_sigpipes()
 
 forecast_date <- Sys.Date()
 noaa_date <- Sys.Date() - days(3)  #Need to use yesterday's NOAA forecast because today's is not available yet
 
 # Step 0: Define a unique name which will identify your model in the leaderboard and connect it to team members info, etc
-model_id <- "neon4cast_example"
+#model_id <- "neon4cast_example"
 
 # Step 1: Download latest target data and site description data
 target <- readr::read_csv(paste0("https://data.ecoforecast.org/neon4cast-targets/",
@@ -153,5 +163,6 @@ write_csv(forecast, forecast_file)
 
 # Step 4: Submit forecast!
 
-neon4cast::submit(forecast_file = forecast_file, metadata = NULL, ask = FALSE)
-
+#neon4cast::submit(forecast_file = forecast_file, metadata = NULL, ask = FALSE)
+FaaSr::faasr_put_file(local_file=forecast_file, remote_folder=folder, remote_file=forecast_file)
+}
